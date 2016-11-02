@@ -136,14 +136,14 @@ var Command = cli.Command{
 			}
 			configFilePath := fmt.Sprintf("%s/config.json", dstUrl.Path)
 			runtimeFilePath := fmt.Sprintf("%s/runtime.json", dstUrl.Path)
-			dstImagesPath := fmt.Sprintf("%s/images/1", dstUrl.Path)
+			dstImagesPath := fmt.Sprintf("%s", dstUrl.Path)
 
 			restoreCmd, err = dst.Start("sudo", "runc", "--id", containerId, "restore", "--tcp-established", "--image-path", dstImagesPath, "--config-file", configFilePath, "--runtime-file", runtimeFilePath)
 			if err != nil {
 				log.Fatal("Error performing restore:", err)
 			}
 		} else {
-			imagesPath = fmt.Sprintf("%s/images", srcUrl.Path)
+			imagesPath = fmt.Sprintf("%s", srcUrl.Path)
 			prepareDir(src, imagesPath)
 
 			migrateStart = time.Now()
@@ -152,7 +152,7 @@ var Command = cli.Command{
 			if ipErr != nil {
 				log.Fatal("Error capturing iptables rules. ", ipErr)
 			}
-			checkpoint(src, containerId, imagesPath, false)
+			checkpoint(src, containerId,  false)
 			iptablesAfter, ipErr2 := getIPTables(src)
 
 			if ipErr2 != nil {
@@ -164,16 +164,16 @@ var Command = cli.Command{
 			srcTarFile := fmt.Sprintf("%s/dump.tar.gz", srcUrl.Path)
 			prepareTar(src, srcTarFile, imagesPath)
 
-			prepareDir(dst, fmt.Sprintf("%s/images", dstUrl.Path))
+			prepareDir(dst, fmt.Sprintf("%s", dstUrl.Path))
 
 			log.Println("Copying checkpoint image to dst")
-			err := cmd.Scp(src.URL(srcTarFile), dst.URL(fmt.Sprintf("%s/images", dstUrl.Path)))
+			err := cmd.Scp(src.URL(srcTarFile), dst.URL(fmt.Sprintf("%s", dstUrl.Path)))
 			if err != nil {
 				log.Fatal("Error copying image files to dst", err)
 			}
 
-			dstTarFile := fmt.Sprintf("%s/images/dump.tar.gz", dstUrl.Path)
-			unpackTar(dst, dstTarFile, fmt.Sprintf("%s/images", dstUrl.Path))
+			dstTarFile := fmt.Sprintf("%s/dump.tar.gz", dstUrl.Path)
+			unpackTar(dst, dstTarFile, fmt.Sprintf("%s", dstUrl.Path))
 
 			log.Println("Performing the restore")
 			// first thing to do, apply the iptables rules
@@ -192,6 +192,7 @@ var Command = cli.Command{
 			configFilePath := fmt.Sprintf("%s/config.json", dstUrl.Path)
 			runtimeFilePath := fmt.Sprintf("%s/runtime.json", dstUrl.Path)
 			dstImagesPath := fmt.Sprintf("%s/images", dstUrl.Path)
+			cdtoPath = dst.Start("cd", dstUrl.Path)
 			restoreCmd, err = dst.Start("sudo", "runc", "--id", containerId, "restore", "--tcp-established", "--image-path", dstImagesPath, "--config-file", configFilePath, "--runtime-file", runtimeFilePath)
 			if err != nil {
 				log.Fatal("Error performing restore:", err)
@@ -303,9 +304,9 @@ func prepareTar(cmd cmd.Cmd, tarFile, workDir string) {
 	}
 }
 
-func checkpoint(cmd cmd.Cmd, containerId, imagesPath string, predump bool) {
+func checkpoint(cmd cmd.Cmd, containerId, predump bool) {
 	log.Printf("Performing the checkpoint predump = %t\n", predump)
-	args := []string{"runc", "--id", containerId, "checkpoint", "--tcp-established", "--track-mem", "--image-path", imagesPath}
+	args := []string{"runc", "checkpoint", "--tcp-established", containerId}
 	if predump {
 		args = append(args, "--pre-dump")
 	}
