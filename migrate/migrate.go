@@ -177,7 +177,7 @@ var Command = cli.Command{
 			}
 
 			log.Println("Rsyncing to dst")
-			rsyncerr := cmd.Rsync(src.URL(fmt.Sprintf("%s/checkpoint", srcUrl.Path)), dst.URL(fmt.Sprintf("%s/checkpoint", dstUrl.Path)))
+			rsyncerr := cmd.Rsync(src.URL(fmt.Sprintf("%s/rootfs", srcUrl.Path)), dst.URL(fmt.Sprintf("%s/rootfs", dstUrl.Path)))
 			if rsyncerr != nil {
 				log.Fatal("Error rsyncing", err)
 			}
