@@ -169,13 +169,13 @@ var Command = cli.Command{
 			if err != nil {
 				log.Fatal("Error copying image files to dst", err)
 			err := cmd.Scp(fmt.Sprintf("%s/config.json", srcUrl.Path), dst.URL(fmt.Sprintf("%s", dstUrl.Path)))
-			if err != nil {
+			if configerr != nil {
 				log.Fatal("Error copying config file to dst", err)
 			}
 
 			log.Println("Rsyncing to dst")
 			err := cmd.Rsync(fmt.Sprintf("%s/checkpoint", srcUrl.Path), dst.URL(fmt.Sprintf("%s/checkpoint", dstUrl.Path)))
-			if err != nil {
+			if rsyncerr != nil {
 				log.Fatal("Error rsyncing", err)
 			}
 
@@ -248,7 +248,7 @@ var Command = cli.Command{
 			TriggerHook(c.String("hook-failed-restore"))
 		}
 
-	}
+	},
 }
 
 func applyIPTablesRules(host cmd.Cmd, rules []string) error {
