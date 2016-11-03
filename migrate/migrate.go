@@ -10,8 +10,8 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/yanadsl/cmt/cmd"
-	"github.com/marcosnils/cmt/iptables"
-	"github.com/marcosnils/cmt/validate"
+	"github.com/yanadsl/cmt/iptables"
+	"github.com/yanadsl/cmt/validate"
 )
 
 var Command = cli.Command{
@@ -168,13 +168,16 @@ var Command = cli.Command{
 			err := cmd.Scp(src.URL(srcTarFile), dst.URL(fmt.Sprintf("%s", dstUrl.Path)))
 			if err != nil {
 				log.Fatal("Error copying image files to dst", err)
-			err := cmd.Scp(fmt.Sprintf("%s/config.json", srcUrl.Path), dst.URL(fmt.Sprintf("%s", dstUrl.Path)))
+		  }
+
+			log.Println("Copying config file to dst")
+			configerr := cmd.Scp(src.URL(fmt.Sprintf("%s/config.json", srcUrl.Path)), dst.URL(fmt.Sprintf("%s", dstUrl.Path)))
 			if configerr != nil {
-				log.Fatal("Error copying config file to dst", err)
+				log.Fatal("Error copying config file to dst", configerr)
 			}
 
 			log.Println("Rsyncing to dst")
-			err := cmd.Rsync(fmt.Sprintf("%s/checkpoint", srcUrl.Path), dst.URL(fmt.Sprintf("%s/checkpoint", dstUrl.Path)))
+			rsyncerr := cmd.Rsync(src.URL(fmt.Sprintf("%s/checkpoint", srcUrl.Path)), dst.URL(fmt.Sprintf("%s/checkpoint", dstUrl.Path)))
 			if rsyncerr != nil {
 				log.Fatal("Error rsyncing", err)
 			}

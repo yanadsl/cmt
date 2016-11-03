@@ -6,14 +6,14 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/yanadsl/cmt/migrate"
-	"github.com/marcosnils/cmt/validate"
+	"github.com/yanadsl/cmt/validate"
 )
 
 const (
 	version = "0.1"
 	usage   = `Container Migration Tool
 
-that can be either used with docker or runC which helps on the task to live migrate 
+that can be either used with docker or runC which helps on the task to live migrate
 The purpose of the project is to create an external command line tool
 that can be either used with docker or runC which helps on the task to live migrate
 containers between different hosts by performing pre-migration validations
