@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/codegangsta/cli"
-	"github.com/marcosnils/cmt/cmd"
+	"github.com/yanadsl/cmt/cmd"
 	"github.com/marcosnils/cmt/iptables"
 	"github.com/marcosnils/cmt/validate"
 )
@@ -168,6 +168,9 @@ var Command = cli.Command{
 			err := cmd.Scp(src.URL(srcTarFile), dst.URL(fmt.Sprintf("%s", dstUrl.Path)))
 			if err != nil {
 				log.Fatal("Error copying image files to dst", err)
+			err := cmd.Scp(fmt.Sprintf("%s/config.json", srcUrl.Path), dst.URL(fmt.Sprintf("%s", dstUrl.Path)))	
+			if err != nil {
+				log.Fatal("Error copying config file to dst", err)
 			}
 
 			log.Println("Rsyncing to dst")
