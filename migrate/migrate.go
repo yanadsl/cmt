@@ -170,6 +170,12 @@ var Command = cli.Command{
 				log.Fatal("Error copying image files to dst", err)
 			}
 
+			log.Println("Rsyncing to dst")
+			err := cmd.Rsync(src.URL(fmt.Sprintf("%s", srcUrl.Path)), dst.URL(fmt.Sprintf("%s", dstUrl.Path)))
+			if err != nil {
+				log.Fatal("Error rsyncing", err)
+			}
+
 			dstTarFile := fmt.Sprintf("%s/dump.tar.gz", dstUrl.Path)
 			unpackTar(dst, dstTarFile, fmt.Sprintf("%s/checkpoint", dstUrl.Path))
 
