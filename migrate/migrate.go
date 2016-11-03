@@ -66,7 +66,7 @@ var Command = cli.Command{
 			predumpPath := fmt.Sprintf("%s/images/0", srcUrl.Path)
 			prepareDir(src, predumpPath)
 
-			checkpoint(src, containerId, predumpPath, true)
+			//checkpoint(src, containerId, predumpPath, true)
 
 			srcTarFile := fmt.Sprintf("%s/predump.tar.gz", srcUrl.Path)
 			prepareTar(src, srcTarFile, predumpPath)
@@ -150,7 +150,7 @@ var Command = cli.Command{
 			if ipErr != nil {
 				log.Fatal("Error capturing iptables rules. ", ipErr)
 			}
-			checkpoint(src, containerId,  false, imagesPath)
+			checkpoint(src, containerId,  false, imagesPath, srcUrl.Path)
 			iptablesAfter, ipErr2 := getIPTables(src)
 
 			if ipErr2 != nil {
@@ -188,7 +188,7 @@ var Command = cli.Command{
 				log.Fatal("Error removing IPTables rules. ", removeErr)
 			}
 			dstImagesPath := fmt.Sprintf("%s/checkpoint", dstUrl.Path)
-			restoreCmd, err = dst.Start("sudo", "runc", "restore", "--tcp-established", "--image-path", dstImagesPath, "--bundle", dstUrl.Path, containerId)
+			restoreCmd, err = dst.Start("sudo", "runc", "restore", "--tcp-established", "--work-path", dstUrl.Path, "--image-path", dstImagesPath, "--bundle", dstUrl.Path, containerId)
 			if err != nil {
 				log.Fatal("Error performing restore:", err)
 			}
@@ -299,9 +299,9 @@ func prepareTar(cmd cmd.Cmd, tarFile, workDir string) {
 	}
 }
 
-func checkpoint(cmd cmd.Cmd, containerId string, predump bool, imagesPath string) {
+func checkpoint(cmd cmd.Cmd, containerId string, predump bool, imagesPath string, workPath string) {
 	log.Printf("Performing the checkpoint predump = %t\n", predump)
-	args := []string{"runc", "checkpoint", "--tcp-established", "--image-path", imagesPath ,containerId}
+	args := []string{"runc", "checkpoint", "--tcp-established", "--image-path", imagesPath , "--work-path", workPath, containerId}
 	if predump {
 		args = append(args, "--pre-dump")
 	}
