@@ -20,13 +20,6 @@ func Scp(src, dest *url.URL) error {
 	return err
 }
 
-func Rsync(src, dest *url.URL) error {
-	rsyncCmd := NewLocal()
-	_, _, err := rsyncCmd.Run("rsync", "-qa", "--size-only", formatCopyURL(src), formatCopyURL(dest))
-
-	return err
-}
-
 func formatCopyURL(u *url.URL) string {
 	if u.Host == "" {
 		return u.String()

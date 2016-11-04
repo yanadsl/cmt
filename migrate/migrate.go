@@ -50,10 +50,8 @@ var Command = cli.Command{
 	Action: func(c *cli.Context) {
 		srcUrl := validate.ParseURL(c.String("src"))
 		dstUrl := validate.ParseURL(c.String("dst"))
-
 		log.Println("Performing validations")
 		src, dst := validate.Validate(srcUrl, dstUrl, c.Bool("force"))
-
 		log.Println("Preparing everything to do a checkpoint")
 		containerId := getContainerId(srcUrl.Path)
 		var imagesPath string
@@ -176,11 +174,8 @@ var Command = cli.Command{
 				log.Fatal("Error copying config file to dst", configerr)
 			}
 
-			log.Println("Rsyncing to dst")
-			rsyncerr := cmd.Rsync(src.URL(fmt.Sprintf("%s/rootfs", srcUrl.Path)), dst.URL(fmt.Sprintf("%s/rootfs", dstUrl.Path)))
-			if rsyncerr != nil {
-				log.Fatal("Error rsyncing", err)
-			}
+			Rsync(src, fmt.Sprintf("%s/rootfs", srcUrl.Path), dstUrl.String())
+			
 
 			dstTarFile := fmt.Sprintf("%s/dump.tar.gz", dstUrl.Path)
 			unpackTar(dst, dstTarFile, fmt.Sprintf("%s/checkpoint", dstUrl.Path))
@@ -200,7 +195,7 @@ var Command = cli.Command{
 				log.Fatal("Error removing IPTables rules. ", removeErr)
 			}
 			dstImagesPath := fmt.Sprintf("%s/checkpoint", dstUrl.Path)
-			restoreCmd, err = dst.Start("sudo", "runc", "restore", "--tcp-established", "--work-path", dstUrl.Path, "--image-path", dstImagesPath, "--bundle", dstUrl.Path, containerId)
+			restoreCmd, err = dst.Start("sudo", "runc", "-d", "restore", "--tcp-established", "--work-path", dstUrl.Path, "--image-path", dstImagesPath, "--bundle", dstUrl.Path, containerId)
 			if err != nil {
 				log.Fatal("Error performing restore:", err)
 			}
@@ -349,4 +344,12 @@ func TriggerHook(command string) error {
 	log.Println(stdout, stderr)
 
 	return err
+}
+
+func Rsync(cmd cmd.Cmd, src string, dst string) {
+	_, _, err := cmd.Run("rsync", "-qa", "--size-only", src,strings.Replace(dst, "ssh://", "", 1))
+	
+	if err != nil {
+		log.Fatal("Error rsyncing:", err)
+	}
 }
