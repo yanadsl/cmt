@@ -46,6 +46,10 @@ var Command = cli.Command{
 			Name:  "hook-failed-restore",
 			Usage: "Command to run right after a failed process restoration",
 		},
+		cli.StringFlag{
+			Name:  "rsync",
+			Usage: "sync rootfs",
+		},
 	},
 	Action: func(c *cli.Context) {
 		srcUrl := validate.ParseURL(c.String("src"))
@@ -174,7 +178,9 @@ var Command = cli.Command{
 				log.Fatal("Error copying config file to dst", configerr)
 			}
 
-			Rsync(src, fmt.Sprintf("%s/rootfs", srcUrl.Path), dstUrl.String())
+			if c.Bool("rsync"){
+				Rsync(src, fmt.Sprintf("%s/rootfs", srcUrl.Path), dstUrl.String())
+			}
 
 			dstTarFile := fmt.Sprintf("%s/dump.tar.gz", dstUrl.Path)
 			unpackTar(dst, dstTarFile, fmt.Sprintf("%s/checkpoint", dstUrl.Path))
