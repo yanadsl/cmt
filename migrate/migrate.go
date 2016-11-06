@@ -175,7 +175,6 @@ var Command = cli.Command{
 			}
 
 			Rsync(src, fmt.Sprintf("%s/rootfs", srcUrl.Path), dstUrl.String())
-			
 
 			dstTarFile := fmt.Sprintf("%s/dump.tar.gz", dstUrl.Path)
 			unpackTar(dst, dstTarFile, fmt.Sprintf("%s/checkpoint", dstUrl.Path))
@@ -195,7 +194,7 @@ var Command = cli.Command{
 				log.Fatal("Error removing IPTables rules. ", removeErr)
 			}
 			dstImagesPath := fmt.Sprintf("%s/checkpoint", dstUrl.Path)
-			restoreCmd, err = dst.Start("sudo", "runc", "-d", "restore", "--tcp-established", "--work-path", dstUrl.Path, "--image-path", dstImagesPath, "--bundle", dstUrl.Path, containerId)
+			restoreCmd, err = dst.Start("sudo", "runc", "restore", "-d",  "--tcp-established", "--work-path", dstUrl.Path, "--image-path", dstImagesPath, "--bundle", dstUrl.Path, containerId)
 			if err != nil {
 				log.Fatal("Error performing restore:", err)
 			}
@@ -283,7 +282,7 @@ func getIPTables(host cmd.Cmd) (string, error) {
 }
 
 func isRunning(containerId string, dstCmd cmd.Cmd) bool {
-	_, _, err := dstCmd.Run("stat", fmt.Sprintf("/var/run/opencontainer/containers/%s", containerId))
+	_, _, err := dstCmd.Run("stat", fmt.Sprintf("/var/run/runc/%s", containerId))
 	if err != nil {
 		return false
 	}
@@ -348,7 +347,6 @@ func TriggerHook(command string) error {
 
 func Rsync(cmd cmd.Cmd, src string, dst string) {
 	_, _, err := cmd.Run("rsync", "-qa", "--size-only", src,strings.Replace(dst, "ssh://", "", 1))
-	
 	if err != nil {
 		log.Fatal("Error rsyncing:", err)
 	}
