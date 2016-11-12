@@ -46,7 +46,7 @@ var Command = cli.Command{
 			Name:  "hook-failed-restore",
 			Usage: "Command to run right after a failed process restoration",
 		},
-		cli.StringFlag{
+		cli.BoolFlag{
 			Name:  "rsync",
 			Usage: "sync rootfs",
 		},
